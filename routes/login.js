@@ -341,15 +341,8 @@ function obtenerMenu(ROLE) {
             icono: 'mdi mdi-folder-lock-open',
             submenu: [
                 // { titulo: 'Usuarios', url: '/usuarios' },
-                { titulo: 'Hospitales', url: '/hospitales' },
-                { titulo: 'Médicos', url: '/medicos' }
-            ]
-        },
-        {
-            titulo: 'Calificaciones',
-            icono: 'mdi mdi-clipboard-flow',
-            submneu: [
-            { titulo: 'Crear nuevo', url: '' }
+                // { titulo: 'Hospitales', url: '/hospitales' },
+                // { titulo: 'Médicos', url: '/medicos' }
             ]
         }
     ];
@@ -357,8 +350,11 @@ function obtenerMenu(ROLE) {
     console.log('ROLE', ROLE);
 
     if (ROLE === 'ADMIN_ROLE') {
-        menu[1].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+        menu[1].submenu.unshift({ titulo: 'Calificaciones', url: '/calificaciones' });
+        menu[1].submenu.unshift({ titulo: 'Grupos', url: '/grupos' });
+        menu[1].submenu.unshift({ titulo: 'Carreras', url: '/carreras' });
         menu[1].submenu.unshift({ titulo: 'Matriculas', url: '/matriculas' });
+        menu[1].submenu.unshift({ titulo: 'Usuarios', icono: 'mdi mdi-folder-lock-open', url: '/usuarios' });
     }
 
 

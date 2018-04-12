@@ -40,6 +40,10 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
             promesa = buscarMatricula(busqueda, regex);
             break;
 
+        case 'matriculas':
+            promesa = buscarMatriculas(busqueda, regex);
+            break;
+
         default:
             return res.status(400).json({
                 ok: false,
