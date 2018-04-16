@@ -32,6 +32,7 @@ var busquedaRoutes = require('./routes/busqueda');
 var uploadRoutes = require('./routes/upload');
 var imagenesRoutes = require('./routes/imagenes');
 var matriculaRoutes = require('./routes/matricula');
+var calfMateriaRoutes = require('./routes/calfMateria');
 
 
 
@@ -60,6 +61,7 @@ app.use('/busqueda', busquedaRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/img', imagenesRoutes);
 app.use('/matricula', matriculaRoutes);
+app.use('/calfMaterias', calfMateriaRoutes);
 
 
 
