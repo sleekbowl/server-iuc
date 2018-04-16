@@ -5,35 +5,36 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
 
-var Matricula = require('../models/matricula');
+var Materia = require('../models/calfMateria');
 
 // ==========================================
-// Obtener todas las matriculas
+// Obtener todas las materias
 // ==========================================
 app.get('/', (req, res, next) => {
 
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Matricula.find({})
+    Materia.find({})
         .skip(desde)
         .limit(5)
-        .populate('usuario', 'nombre email')
+        .populate('alumno', 'usuario matricula')
+        .populate('catedratico', 'usuario matricula')
         .exec(
-            (err, matriculas) => {
+            (err, materias) => {
 
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando matriculas',
+                        mensaje: 'Error cargando materias',
                         errors: err
                     });
                 }
 
-                Matricula.count({}, (err, conteo) => {
+                Materia.count({}, (err, conteo) => {
                     res.status(200).json({
                         ok: true,
-                        matriculas: matriculas,
+                        materias: materias,
                         total: conteo
                     });
 
@@ -43,35 +44,36 @@ app.get('/', (req, res, next) => {
 });
 
 // ==========================================
-// Obtener matricula
+// Obtener materia
 // ==========================================
 app.get('/:id', (req, res) => {
 
     var id = req.params.id;
 
-    Matricula.findById(id)
-        .populate('usuario', 'nombre email img calle colonia sexo cp fechaNacimiento tipoSangre telefonoPersonal telefonoTutor seguro')
-        .exec((err, matricula) => {
+    Materia.findById(id)
+        .populate('alumno', 'usuario matricula')
+        .populate('catedratico', 'usuario matricula')
+        .exec((err, materia) => {
 
             if (err) {
                 return res.status(500).json({
                     ok: false,
-                    mensaje: 'Error al buscar matricula',
+                    mensaje: 'Error al buscar materia',
                     errors: err
                 });
             }
 
-            if (!matricula) {
+            if (!materia) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'La matricula con el id ' + id + ' no existe',
-                    errors: { message: 'No existe una matricula con ese ID' }
+                    mensaje: 'La materia con el id ' + id + ' no existe',
+                    errors: { message: 'No existe una materia con ese ID' }
                 });
             }
 
             res.status(200).json({
                 ok: true,
-                matricula: matricula
+                materia: materia
             });
 
         })
@@ -87,46 +89,50 @@ app.put('/:id', (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
-    Matricula.findById(id, (err, matricula) => {
+    Materia.findById(id, (err, materia) => {
 
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar matricula',
+                mensaje: 'Error al buscar materia',
                 errors: err
             });
         }
 
-        if (!matricula) {
+        if (!materia) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'La matricula con el id ' + id + ' no existe',
-                errors: { message: 'No existe una matricula con ese ID' }
+                mensaje: 'La materia con el id ' + id + ' no existe',
+                errors: { message: 'No existe una materia con ese ID' }
             });
         }
 
 
-        matricula.matricula = body.matricula;
-        matricula.tipo = body.tipo;
-        matricula.titulo = body.titulo;
-        matricula.role = body.role;
-        matricula.usuario = body.usuario;
-        matricula.vinculada = body.vinculada;
+        materia.grupo = body.grupo;
+        materia.materia = body.materia;
+        materia.calificacion = body.calificacion;
+        materia.anio = body.anio;
+        materia.catedratico = body.catedratico;
+        materia.alumno = body.alumno;
+        materia.aprobado = body.aprobado;
+        materia.usuario = body.usuario;
+        materia.carrera = body.carrera;
+        materia.recursamiento = body.recursamiennto;
 
-        matricula.save((err, matriculaGuardado) => {
+        materia.save((err, materiaGuardado) => {
 
             if (err) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'Error al actualizar matricula',
+                    mensaje: 'Error al actualizar materia',
                     errors: err
                 });
             }
 
             res.status(200).json({
                 ok: true,
-                matricula: matriculaGuardado
+                materia: materiaGuardado
             });
 
         });
@@ -135,35 +141,32 @@ app.put('/:id', (req, res) => {
 
 });
 
-
 // ==========================================
-// Crear una nueva matricula
+// Crear una nueva materia
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
     var body = req.body;
 
-    var matricula = new Matricula({
-        matricula: body.matricula,
-        tipo: body.tipo,
-        titulo: body.titulo,
-        role: body.role,
-        usuario: body.usuario
+    var materia = new Materia({
+        grupo: body.grupo,
+        materia: body.materia,
+        carrera: body.carrera
     });
 
-    matricula.save((err, matriculaGuardado) => {
+    materia.save((err, materiaGuardado) => {
 
         if (err) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'Error al crear matricula',
+                mensaje: 'Error al crear materia',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok: true,
-            matricula: matriculaGuardado
+            materia: materiaGuardado
         });
 
 
@@ -173,38 +176,39 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
 
 // ============================================
-//   Borrar una matricula por el id
+//   Borrar una materia por el id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     var id = req.params.id;
 
-    Matricula.findByIdAndRemove(id, (err, matriculaBorrado) => {
+    Matricula.findByIdAndRemove(id, (err, materiaBorrado) => {
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al borrar matricula',
+                mensaje: 'Error al borrar materia',
                 errors: err
             });
         }
 
-        if (!matriculaBorrado) {
+        if (!materiaBorrado) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'No existe una matricula con ese id',
-                errors: { message: 'No existe una matricula con ese id' }
+                mensaje: 'No existe una materia con ese id',
+                errors: { message: 'No existe una materia con ese id' }
             });
         }
 
         res.status(200).json({
             ok: true,
-            matricula: matriculaBorrado
+            materia: materiaBorrado
         });
 
     });
 
 });
+
 
 
 module.exports = app;
