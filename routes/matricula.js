@@ -107,7 +107,7 @@ app.put('/:id',(req, res) => {
         }
 
 
-        matricula.nombre = body.matricula;
+        matricula.matricula = body.matricula;
         matricula.tipo = body.tipo;
         matricula.titulo = body.titulo;
         matricula.role = body.role;

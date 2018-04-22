@@ -63,7 +63,9 @@ app.post('/google', (req, res) => {
             // If request specified a G Suite domain:
             //var domain = payload['hd'];
 
-            Usuario.findOne({ email: payload.email }, (err, usuario) => {
+            Usuario.findOne({ email: payload.email })
+            .populate('matricula', 'matricula tipo titulo role')
+            .exec((err, usuario) => {
 
                 if (err) {
                     return res.status(500).json({
@@ -181,7 +183,9 @@ app.post('/googleRegister', (req, res) => {
             // If request specified a G Suite domain:
             //var domain = payload['hd'];
 
-            Usuario.findOne({ email: payload.email }, (err, usuario) => {
+            Usuario.findOne({ email: payload.email })
+            .populate('matricula', 'matricula tipo titulo role')
+            .exec((err, usuario) => {
 
                 if (err) {
                     return res.status(500).json({
@@ -277,7 +281,9 @@ app.post('/', (req, res) => {
 
     var body = req.body;
 
-    Usuario.findOne({ email: body.email }, (err, usuarioDB) => {
+    Usuario.findOne({ email: body.email })
+    .populate('matricula', 'matricula tipo titulo role')
+    .exec((err, usuarioDB) => {
 
         if (err) {
             return res.status(500).json({
@@ -313,7 +319,7 @@ app.post('/', (req, res) => {
             usuario: usuarioDB,
             token: token,
             id: usuarioDB._id,
-            menu: obtenerMenu(usuarioDB.role)
+            menu: obtenerMenu(usuarioDB.matricula.role)
         });
 
     })
@@ -325,36 +331,73 @@ app.post('/', (req, res) => {
 
 function obtenerMenu(ROLE) {
 
-    var menu = [{
-            titulo: 'Principal',
-            icono: 'mdi mdi-gauge',
-            submenu: [
-                { titulo: 'Portal', url: '/dashboard' },
-                { titulo: 'ProgressBar', url: '/progress' },
-                { titulo: 'Gráficas', url: '/graficas1' },
-                { titulo: 'Promesas', url: '/promesas' },
-                { titulo: 'RxJs', url: '/rxjs' }
-            ]
-        },
-        {
-            titulo: 'Mantenimientos',
-            icono: 'mdi mdi-folder-lock-open',
-            submenu: [
-                // { titulo: 'Usuarios', url: '/usuarios' },
-                // { titulo: 'Hospitales', url: '/hospitales' },
-                // { titulo: 'Médicos', url: '/medicos' }
-            ]
-        }
-    ];
+    if ( ROLE === 'ADMIN_ROLE' ){
+        var menu = [{
+                titulo: 'Principal',
+                icono: 'fa fa-home',
+                submenu: [
+                    { titulo: 'Portal', url: '/dashboard' },
+                    { titulo: 'Becas', url: '/becasAdmin' },
+                    { titulo: 'Convocatorias', url: '/convocatoriasAdmin' },
+                    { titulo: 'Graficas', url: '/graficasAdmin' }
+                ]
+            },
+            {
+                titulo: 'Chat',
+                icono: 'fa fa-comments-o',
+                submenu: [
+                    { titulo: 'Principal', url: '/chat' },
+                    { titulo: 'Contactos', url: '/contactos' }
+                ]
+            },
+            {
+                titulo: 'Mantenimiento',
+                icono: 'mdi mdi-folder-lock-open',
+                submenu: [
+                    { titulo: 'Calificaciones', url: '/calificaciones' },
+                    { titulo: 'Grupos', url: '/grupos' },
+                    { titulo: 'Carreras', url: '/carreras' },
+                    { titulo: 'Matriculas', url: '/matriculas' },
+                    { titulo: 'Usuarios', icono: 'mdi mdi-folder-lock-open', url: '/usuarios' }
+                ]
+            }
+        ];
+    }
+
+    if ( ROLE === 'ALUMNO_ROLE' ){
+        var menu = [{
+                titulo: 'Principal',
+                icono: 'fa fa-home',
+                submenu: [
+                    { titulo: 'Portal', url: '/dashboard' },
+                    { titulo: 'Becas', url: '/becas' },
+                    { titulo: 'Convocatorias', url: '/convocatorias' },
+                    { titulo: 'Graficas', url: '/graficas' }
+                ]
+            },
+            {
+                titulo: 'Portafolio',
+                icono: 'fa fa-briefcase',
+                submenu: [
+                    { titulo: 'Calificaciones', url: '/calificaciones' },
+                    { titulo: 'Examenes', url: '/contactos' }
+                ]
+            },
+            {
+                titulo: 'Chat',
+                icono: 'fa fa-comments-o',
+                submenu: [
+                    { titulo: 'Principal', url: '/chat' },
+                    { titulo: 'Contactos', url: '/contactos' }
+                ]
+            }
+        ];
+    }
 
     console.log('ROLE', ROLE);
 
     if (ROLE === 'ADMIN_ROLE') {
-        menu[1].submenu.unshift({ titulo: 'Calificaciones', url: '/calificaciones' });
-        menu[1].submenu.unshift({ titulo: 'Grupos', url: '/grupos' });
-        menu[1].submenu.unshift({ titulo: 'Carreras', url: '/carreras' });
-        menu[1].submenu.unshift({ titulo: 'Matriculas', url: '/matriculas' });
-        menu[1].submenu.unshift({ titulo: 'Usuarios', icono: 'mdi mdi-folder-lock-open', url: '/usuarios' });
+        
     }
 
 
