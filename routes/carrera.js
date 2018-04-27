@@ -5,38 +5,37 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
 
-var Grupo = require('../models/grupo');
+var Carrera = require('../models/carrera');
 
 // ==========================================
-// Obtener grupo por año
+// Obtener carrera por nombre o revoe
 // ==========================================
-app.get('/:year', (req, res) => {
+app.get('/:tipo', (req, res) => {
 
-    var year = req.params.year;
+    var tipo = req.params.tipo;
 
-    Grupo.findOne({ 'nombre' : year })
-        .populate('usuario', 'nombre email img telefonoPersonal _id')
-        .exec((err, grupo) => {
+    Carrera.findOne({ 'nombre': tipo })
+        .exec((err, carrera) => {
 
             if (err) {
                 return res.status(500).json({
                     ok: false,
-                    mensaje: 'Error al buscar grupo',
+                    mensaje: 'Error al buscar carrera',
                     errors: err
                 });
             }
 
-            if (!grupo) {
+            if (!carrera) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'La grupo con el id ' + id + ' no existe',
-                    errors: { message: 'No existe una grupo con ese año' }
+                    mensaje: 'La carrera buscada con ' + id + ' no existe',
+                    errors: { message: 'No existe una carrera con ese parametro de busqueda' }
                 });
             }
 
             res.status(200).json({
                 ok: true,
-                grupo: grupo
+                carrera: carrera
             });
 
         })
@@ -45,7 +44,7 @@ app.get('/:year', (req, res) => {
 });
 
 // ==========================================
-// Actualizar grupo {Alumnos en el grupo}
+// Actualizar carrera {Alumnos en el carrera}
 // ==========================================
 app.put('/:id', (req, res) => {
 
@@ -58,30 +57,30 @@ app.put('/:id', (req, res) => {
         }
     };
 
-    Grupo.findByIdAndUpdate(id, {
+    Carrera.findByIdAndUpdate(id, {
         $push: { alumnos: body.id }
-    }, (err, grupo) => {
+    }, (err, carrera) => {
 
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al buscar grupo',
+                mensaje: 'Error al buscar carrera',
                 errors: err
             });
         }
 
-        if (!grupo) {
+        if (!carrera) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'La grupo con el id ' + id + ' no existe',
-                errors: { message: 'No existe una grupo con ese ID' }
+                mensaje: 'La carrera con el id ' + id + ' no existe',
+                errors: { message: 'No existe una carrera con ese ID' }
             });
         }
 
         res.status(200).json({
                 ok: true,
-                grupo: grupo
+                carrera: carrera
             });
 
     });
@@ -90,13 +89,13 @@ app.put('/:id', (req, res) => {
 
 
 // ==========================================
-// Crear una nueva grupo
+// Crear una nueva carrera
 // ==========================================
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
     var body = req.body;
 
-    var grupo = new Grupo({
+    var carrera = new Carrera({
         nombre: body.nombre,
         tipo: body.tipo,
         year: body.year,
@@ -104,19 +103,19 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         alumnos: body.alumnos
     });
 
-    grupo.save((err, grupoGuardado) => {
+    carrera.save((err, carreraGuardado) => {
 
         if (err) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'Error al crear grupo',
+                mensaje: 'Error al crear carrera',
                 errors: err
             });
         }
 
         res.status(201).json({
             ok: true,
-            grupo: grupoGuardado
+            carrera: carreraGuardado
         });
 
 
@@ -126,33 +125,33 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
 
 // ============================================
-//   Borrar una grupo por el id
+//   Borrar una carrera por el id
 // ============================================
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     var id = req.params.id;
 
-    Grupo.findByIdAndRemove(id, (err, grupoBorrado) => {
+    Carrera.findByIdAndRemove(id, (err, carreraBorrado) => {
 
         if (err) {
             return res.status(500).json({
                 ok: false,
-                mensaje: 'Error al borrar grupo',
+                mensaje: 'Error al borrar carrera',
                 errors: err
             });
         }
 
-        if (!grupoBorrado) {
+        if (!carreraBorrado) {
             return res.status(400).json({
                 ok: false,
-                mensaje: 'No existe una grupo con ese id',
-                errors: { message: 'No existe una grupo con ese id' }
+                mensaje: 'No existe una carrera con ese id',
+                errors: { message: 'No existe una carrera con ese id' }
             });
         }
 
         res.status(200).json({
             ok: true,
-            grupo: grupoBorrado
+            carrera: carreraBorrado
         });
 
     });
