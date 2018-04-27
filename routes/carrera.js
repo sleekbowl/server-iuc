@@ -8,6 +8,36 @@ var app = express();
 var Carrera = require('../models/carrera');
 
 // ==========================================
+// Obtener todas las carreras
+// ==========================================
+app.get('/', (req, res, next) => {
+
+    Carrera.find({})
+        .exec(
+            (err, carreras) => {
+
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando carreras',
+                        errors: err
+                    });
+                }
+
+                Carrera.count({}, (err, conteo) => {
+
+                    res.status(200).json({
+                        ok: true,
+                        carreras: carreras,
+                        total: conteo
+                    });
+                })
+
+            });
+});
+
+
+// ==========================================
 // Obtener carrera por nombre o revoe
 // ==========================================
 app.get('/:tipo', (req, res) => {
@@ -44,22 +74,14 @@ app.get('/:tipo', (req, res) => {
 });
 
 // ==========================================
-// Actualizar carrera {Alumnos en el carrera}
+// Actualizar carrera
 // ==========================================
 app.put('/:id', (req, res) => {
 
     var id = req.params.id;
     var body = req.body;
 
-    update = {
-        $set: {
-
-        }
-    };
-
-    Carrera.findByIdAndUpdate(id, {
-        $push: { alumnos: body.id }
-    }, (err, carrera) => {
+    Carrera.findById(id, (err, carrera) => {
 
 
         if (err) {
@@ -78,10 +100,27 @@ app.put('/:id', (req, res) => {
             });
         }
 
-        res.status(200).json({
+        carrera.nombre = body.nombre;
+        carrera.revor = body.revoe;
+        carrera.year = carrera.year;
+
+
+        carrera.save((err, carreraGuardada) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar carrera',
+                    errors: err
+                });
+            }
+
+            res.status(200).json({
                 ok: true,
-                carrera: carrera
+                carrera: carreraGuardada
             });
+
+        });
 
     });
 
@@ -97,13 +136,11 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
     var carrera = new Carrera({
         nombre: body.nombre,
-        tipo: body.tipo,
-        year: body.year,
-        img: body.img,
-        alumnos: body.alumnos
+        revoe: body.revoe,
+        year: body.year
     });
 
-    carrera.save((err, carreraGuardado) => {
+    carrera.save((err, carreraGuardada) => {
 
         if (err) {
             return res.status(400).json({
@@ -115,7 +152,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
         res.status(201).json({
             ok: true,
-            carrera: carreraGuardado
+            carrera: carreraGuardada
         });
 
 
@@ -131,7 +168,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
     var id = req.params.id;
 
-    Carrera.findByIdAndRemove(id, (err, carreraBorrado) => {
+    Carrera.findByIdAndRemove(id, (err, carreraBorrada) => {
 
         if (err) {
             return res.status(500).json({
@@ -141,7 +178,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
 
-        if (!carreraBorrado) {
+        if (!carreraBorrada) {
             return res.status(400).json({
                 ok: false,
                 mensaje: 'No existe una carrera con ese id',
@@ -151,7 +188,7 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
         res.status(200).json({
             ok: true,
-            carrera: carreraBorrado
+            carrera: carreraBorrada
         });
 
     });
