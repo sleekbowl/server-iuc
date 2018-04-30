@@ -40,11 +40,11 @@ app.get('/', (req, res, next) => {
 // ==========================================
 // Obtener carrera por nombre o revoe
 // ==========================================
-app.get('/:tipo', (req, res) => {
+app.get('/:id', (req, res) => {
 
-    var tipo = req.params.tipo;
+    var id = req.params.id;
 
-    Carrera.findOne({ 'nombre': tipo })
+    Carrera.findById( id )
         .exec((err, carrera) => {
 
             if (err) {
