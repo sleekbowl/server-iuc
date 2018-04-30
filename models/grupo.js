@@ -8,7 +8,7 @@ var grupoSchema = new Schema({
     year: {type: Number, required:true },
     carrera: { type: Schema.Types.ObjectId, ref: 'Carrera', required: true },
     img: { type: String, required: false },
-    alumnos: [[{ type: Schema.Types.ObjectId, ref: 'Matricula', required: false }]]
+    alumnos: [{ type: Schema.Types.ObjectId, ref: 'Matricula', required: false }]
 });
 
 
