@@ -6,6 +6,7 @@ var Hospital = require('../models/hospital');
 var Medico = require('../models/medico');
 var Usuario = require('../models/usuario');
 var Matricula = require('../models/matricula');
+var Grupo = require('../models/grupo');
 
 // ==============================
 // Busqueda por colección
@@ -44,10 +45,14 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
             promesa = buscarMatriculas(busqueda, regex);
             break;
 
+        case 'grupos':
+            promesa = buscarGrupo(busqueda, regex);
+            break;
+
         default:
             return res.status(400).json({
                 ok: false,
-                mensaje: 'Los tipos de busqueda sólo son: usuarios, usuario, medicos y hospitales',
+                mensaje: 'Los tipos de busqueda sólo son: usuarios, matricula, medicos, hospitales y grupos',
                 error: { message: 'Tipo de tabla/coleccion no válido' }
             });
 
@@ -184,18 +189,18 @@ function buscarMatriculas(busqueda, regex) {
             });
     });
 }
-function buscarMatricula(busqueda, regex) {
+function buscarGrupo(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
 
-        Matricula.find({ matricula: busqueda })
-            .populate('usuario', 'nombre email img')
-            .exec((err, matricula) => {
+        Grupo.find({ nombre: regex })
+            .populate('carrera', 'nombre')
+            .exec((err, grupo) => {
 
                 if (err) {
-                    reject('Error al buscar matricula', err);
+                    reject('Error al buscar grupo', err);
                 } else {
-                    resolve(matricula)
+                    resolve(grupo)
                 }
             });
     });

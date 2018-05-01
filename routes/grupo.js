@@ -92,8 +92,9 @@ app.get('/', (req, res, next) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Grupo.find({}, 'nombre tipo year carrera img alumnos')
+    Grupo.find({}, 'nombre tipo year carrera img')
         .skip(desde)
+        .populate('carrera', 'nombre')
         .limit(5)
         .exec(
             (err, grupos) => {
