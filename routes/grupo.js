@@ -53,8 +53,9 @@ app.get('/:id', (req, res) => {
     Grupo.findById(id)
         .populate({
             path: 'matricula', select: 'usuario',
-            populate: { path: 'usuario', select: 'nombre' }
+            populate: { path: 'usuario', select: 'nombre img' }
         })
+        .populate( 'carrera', 'nombre')
         .exec((err, grupo) => {
 
             if (err) {
