@@ -86,6 +86,45 @@ app.get('/:id', (req, res) => {
 });
 
 // ==========================================
+// Obtener Usuario por nombre
+// ==========================================
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Usuario.findById(id)
+        // .populate('hospital')
+        .exec((err, usuario) => {
+
+            usuario.password = ":)";
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar usuario',
+                    errors: err
+                });
+            }
+
+            if (!usuario) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El usuario con el id ' + id + ' no existe',
+                    errors: { message: 'No existe un usuario con ese ID' }
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                usuario: usuario
+            });
+
+        })
+
+
+});
+
+
+// ==========================================
 // Actualizar usuario
 // ==========================================
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {

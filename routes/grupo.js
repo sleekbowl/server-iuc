@@ -130,7 +130,7 @@ app.get('/', (req, res, next) => {
 app.put('/:id', (req, res) => {
 
     var id = req.params.id;
-    var body = req.body;
+    var alumno = req.body.alumno;
 
     update = {
         $set: {
@@ -139,7 +139,7 @@ app.put('/:id', (req, res) => {
     };
 
     Grupo.findByIdAndUpdate(id, {
-        $push: { alumnos: body.id }
+        $push: { alumnos: alumno }
     }, (err, grupo) => {
 
 
