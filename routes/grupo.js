@@ -51,12 +51,11 @@ app.get('/:id', (req, res) => {
     var id = req.params.id;
 
     Grupo.findById(id)
-        .populate({
-            path: 'matricula', select: 'usuario',
-            populate: { path: 'usuario', select: 'nombre img' }
-        })
-        .populate( 'carrera', 'nombre')
-        .exec((err, grupo) => {
+        // .populate({
+        //     path: 'alumnos', select: 'usuario',
+        //     populate: { path: 'usuario', select: 'nombre img' }
+        // })
+        .exec((err, grupo) => { 
 
             if (err) {
                 return res.status(500).json({
@@ -133,14 +132,27 @@ app.put('/:id', (req, res) => {
     var alumno = req.body.alumno;
 
     update = {
-        $set: {
-
+        $push: {
+            alumnos: alumno
         }
     };
+    if (alumno === null){
+        return res.status(400).json({
+                ok: false,
+                mensaje: 'No se encuentra un valor en alumno',
+                errors: err
+            });
+    }
+    if (alumno === ""){
+        return res.status(400).json({
+                ok: false,
+                mensaje: 'No se encuentra un valor en alumno',
+                errors: err
+            });
+    }
 
-    Grupo.findByIdAndUpdate(id, {
-        $push: { alumnos: alumno }
-    }, (err, grupo) => {
+
+    Grupo.findByIdAndUpdate(id, update, (err, grupo) => {
 
 
         if (err) {
