@@ -137,8 +137,9 @@ function buscarUsuarios(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
 
-        Usuario.find({}, 'nombre email img')
-            .or([{ 'nombre': regex }, { 'email': regex }], [{ 'matricula': regex }])
+        Usuario.find({}, 'nombre email img matricula')
+            .or([{ 'nombre': regex }, { 'email': regex }])
+            .populate('matricula', 'tipo titulo')
             .exec((err, usuarios) => {
 
                 if (err) {
@@ -185,6 +186,22 @@ function buscarMatriculas(busqueda, regex) {
                     reject('Error al cargar matriculas', err);
                 } else {
                     resolve(matriculas)
+                }
+            });
+    });
+}
+function buscarMatricula(busqueda, regex) {
+
+    return new Promise((resolve, reject) => {
+
+        Matricula.find({ matricula: busqueda })
+            .populate('usuario', 'nombre email img')
+            .exec((err, matricula) => {
+
+                if (err) {
+                    reject('Error al cargar matriculas', err);
+                } else {
+                    resolve(matricula)
                 }
             });
     });

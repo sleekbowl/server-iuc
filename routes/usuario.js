@@ -18,6 +18,7 @@ app.get('/', (req, res, next) => {
 
     Usuario.find({}, 'nombre email img role google')
         .skip(desde)
+        .populate('matricula', 'tipo titulo')
         .limit(5)
         .exec(
             (err, usuarios) => {
