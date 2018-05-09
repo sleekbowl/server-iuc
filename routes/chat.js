@@ -1,9 +1,17 @@
+var express = require('express');
+
+var mdAutenticacion = require('../middlewares/autenticacion');
+
+var app = express();
+
+
 "use strict"
 const Conversation = require('../models/conversation'),  
       Message = require('../models/message'),
       User = require('../models/usuario');
 
-exports.getConversations = function(req, res, next) {  
+
+app.get('/', (req, res) => {  
   // Only return one message from each conversation to display as snippet
   Conversation.find({ participants: req.user._id })
     .select('_id')
@@ -36,9 +44,9 @@ exports.getConversations = function(req, res, next) {
       });
   });
 
-};
+});
 
-exports.getConversation = function(req, res, next) {  
+app.get('/:conversationId', (req, res, next) => {  
   Message.find({ conversationId: req.params.conversationId })
     .select('createdAt body author')
     .sort('-createdAt')
@@ -54,10 +62,9 @@ exports.getConversation = function(req, res, next) {
 
       res.status(200).json({ conversation: messages });
     });
-  }
+  });
 
-
-  exports.newConversation = function(req, res, next) {  
+app.post('/new/:recipient', (req, res, next) => {  
   if(!req.params.recipient) {
     res.status(422).send({ error: 'Please choose a valid recipient for your message.' });
     return next();
@@ -94,9 +101,9 @@ exports.getConversation = function(req, res, next) {
       return next();
     });
   });
-}
+});
 
-exports.sendReply = function(req, res, next) {  
+app.post('/:conversationId', (req, res, next) => {  
   const reply = new Message({
     conversationId: req.params.conversationId,
     body: req.body.composedMessage,
@@ -112,4 +119,5 @@ exports.sendReply = function(req, res, next) {
     res.status(200).json({ message: 'Reply successfully sent!' });
     return(next);
   });
-}
+});
+module.exports = app;
