@@ -11,14 +11,24 @@ const Conversation = require('../models/conversation'),
       User = require('../models/usuario');
 
 
-app.get('/', (req, res) => {  
+app.get('/found/:busqueda', (req, res) => {  
   // Only return one message from each conversation to display as snippet
-  Conversation.find({ participants: req.user._id })
-    .select('_id')
+  Conversation.find({ participants: req.params.busqueda })
     .exec(function(err, conversations) {
       if (err) {
-        res.send({ error: err });
-        return next(err);
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Se encontro un error interno',
+                        conversations: null,
+                        errors: err
+                    });
+                }
+      if(conversations = []){
+        return res.status(200).json({
+                        ok: false,
+                        mensaje: 'No se ha iniciado ninguna conversacion con ese id',
+                        conversations: null
+                    });
       }
 
       // Set up empty array to hold conversations + most recent message
@@ -33,8 +43,11 @@ app.get('/', (req, res) => {
           })
           .exec(function(err, message) {
             if (err) {
-              res.send({ error: err });
-              return next(err);
+              return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error buscar conversacion',
+                        errors: err
+                    });
             }
             fullConversations.push(message);
             if(fullConversations.length === conversations.length) {
@@ -46,7 +59,7 @@ app.get('/', (req, res) => {
 
 });
 
-app.get('/:conversationId', (req, res, next) => {  
+app.get('/conversation/:conversationId', (req, res, next) => {  
   Message.find({ conversationId: req.params.conversationId })
     .select('createdAt body author')
     .sort('-createdAt')
@@ -56,8 +69,11 @@ app.get('/:conversationId', (req, res, next) => {
     })
     .exec(function(err, messages) {
       if (err) {
-        res.send({ error: err });
-        return next(err);
+        return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error buscar conversacion',
+                        errors: err
+                    });
       }
 
       res.status(200).json({ conversation: messages });
