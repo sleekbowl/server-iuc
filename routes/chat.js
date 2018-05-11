@@ -3,6 +3,9 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
+var mongoose = require('mongoose').set('debug', true);
+
+var user = require('../models/usuario')
 
 
 "use strict"
@@ -11,15 +14,19 @@ const Conversation = require('../models/conversation'),
       User = require('../models/usuario');
 
 
-app.get('/found/:busqueda', (req, res) => {  
+// ==========================================
+// Obtener las conversaciones del usuario
+// ==========================================
+app.get('/found/:busqueda', (req, res) => {
+  // var found = mongoose.mongo.BSONPure.ObjectID.fromHexString(req.params.busqueda);
   // Only return one message from each conversation to display as snippet
-  Conversation.find({ participants: req.params.busqueda })
+  Conversation.find({participants:{$in:[moongose.Type.ObjetId("5aceccaffe043506086de523")]}}) 
     .exec(function(err, conversations) {
       if (err) {
                     return res.status(500).json({
                         ok: false,
                         mensaje: 'Se encontro un error interno',
-                        conversations: null,
+                        conversations: [],
                         errors: err
                     });
                 }
@@ -27,7 +34,7 @@ app.get('/found/:busqueda', (req, res) => {
         return res.status(200).json({
                         ok: false,
                         mensaje: 'No se ha iniciado ninguna conversacion con ese id',
-                        conversations: null
+                        conversations: conversations,
                     });
       }
 
@@ -59,13 +66,16 @@ app.get('/found/:busqueda', (req, res) => {
 
 });
 
+// ==========================================
+// Obtener la charla de una conversacion
+// ==========================================
 app.get('/conversation/:conversationId', (req, res, next) => {  
   Message.find({ conversationId: req.params.conversationId })
     .select('createdAt body author')
     .sort('-createdAt')
     .populate({
       path: 'author',
-      select: 'profile.firstName profile.lastName'
+      select: 'nombre img'
     })
     .exec(function(err, messages) {
       if (err) {
@@ -80,37 +90,49 @@ app.get('/conversation/:conversationId', (req, res, next) => {
     });
   });
 
-app.post('/new/:recipient', (req, res, next) => {  
-  if(!req.params.recipient) {
+// ==========================================
+// Crear una nueva conversacion
+// ==========================================
+app.post('/conversation/:receptor', (req, res, next) => {  
+  if(!req.params.receptor) {
     res.status(422).send({ error: 'Please choose a valid recipient for your message.' });
     return next();
   }
 
-  if(!req.body.composedMessage) {
-    res.status(422).send({ error: 'Please enter a message.' });
+  if(!req.body.mensaje) {
+    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'No se envio ningun mensaje!',
+                        errors: err
+                    });
     return next();
   }
-
   const conversation = new Conversation({
-    participants: [req.user._id, req.params.recipient]
+    participants: [req.body.user, req.params.receptor]
   });
 
   conversation.save(function(err, newConversation) {
     if (err) {
-      res.send({ error: err });
-      return next(err);
+      return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al crear la conversacion',
+                        errors: err
+                    });
     }
 
     const message = new Message({
       conversationId: newConversation._id,
-      body: req.body.composedMessage,
-      author: req.user._id
+      body: req.body.mensaje,
+      author: req.body.user
     });
 
     message.save(function(err, newMessage) {
       if (err) {
-        res.send({ error: err });
-        return next(err);
+        return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al enviar el mensaje',
+                        errors: err
+                    });
       }
 
       res.status(200).json({ message: 'Conversation started!', conversationId: conversation._id });
@@ -119,7 +141,10 @@ app.post('/new/:recipient', (req, res, next) => {
   });
 });
 
-app.post('/:conversationId', (req, res, next) => {  
+// ==========================================
+// Enviar un mensaje a una conversacion
+// ==========================================
+app.post('/sendMensaje/:conversationId', (req, res, next) => {  
   const reply = new Message({
     conversationId: req.params.conversationId,
     body: req.body.composedMessage,
