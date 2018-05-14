@@ -15,10 +15,10 @@ var Grupo = require('../models/grupo');
 // ==========================================
 // Obtener las conversaciones del usuario
 // ==========================================
-app.get('/user/:id', (req, res, next) => {
+app.post('/user', (req, res, next) => {
 
-  var busqueda = req.params.id;
-  Conversation.find({participantsId:{ $in: [busqueda] }})
+  var serv = req.body.identificacion;
+  Conversation.find({participantsId:{ $in: [serv] }})
   .populate('participantsId','nombre img')
   .exec( (err, conversations, next) => {
       if (err) {
@@ -29,36 +29,38 @@ app.get('/user/:id', (req, res, next) => {
                         errors: err
                     });
                 }
-                // return res.status(200).json({
-                //         ok: true,
-                //         mensaje: 'Prueba',
-                //         conversations: conversations
-                //         });
-      // Set up empty array to hold conversations + most recent message
-      let fullConversations = [];
-      conversations.forEach(function(conversation) {
-        Message.find({ 'conversationId': conversation._id })
-          .sort('-createdAt')
-          .limit(1)
-          .populate({
-            path: "author",
-            select: "nombre img"
-          })
-          .exec(function(err, message) {
-            if (err) {
-              return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error buscar conversacion',
-                        errors: err
+      return res.status(200).json({
+                        ok: true,
+                        mensaje: 'Conversaciones del usuario',
+                        conversations: conversations
                     });
-            }
-            fullConversations.push(message);
-            fullConversations.private = conversation.private;
-            if(fullConversations.length === conversations.length) {
-              return res.status(200).json({ conversations: fullConversations });
-            }
-          });
-      });
+
+      // Set up empty array to hold conversations + most recent message
+      // let conversation1 = conversations;
+      // let fullConversations = [];
+      // conversations.forEach(function(conversation) {
+      //   Message.find({ 'conversationId': conversation._id })
+      //     .sort('-createdAt')
+      //     .limit(1)
+      //     .populate({
+      //       path: "author",
+      //       select: "nombre img"
+      //     })
+      //     .exec(function(err, message) {
+      //       if (err) {
+      //         return res.status(500).json({
+      //                   ok: false,
+      //                   mensaje: 'Error buscar conversacion',
+      //                   errors: err
+      //               });
+      //       }
+      //       fullConversations.push(message);
+      //       if(fullConversations.length === conversations.length) {
+
+      //         return res.status(200).json({ conversationGeneral:conversation1 , conversationsMensaje: fullConversations });
+      //       }
+      //     });
+      // });
   });
 
 });
