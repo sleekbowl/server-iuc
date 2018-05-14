@@ -3,25 +3,24 @@ var express = require('express');
 var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
-var mongoose = require('mongoose').set('debug', true);
 
-var user = require('../models/usuario')
+var user = require('../models/usuario');
 
-
-"use strict"
-const Conversation = require('../models/conversation'),  
-      Message = require('../models/message'),
-      User = require('../models/usuario');
+var Conversation = require('../models/conversation');  
+var Message = require('../models/message');
+var User = require('../models/usuario');
+var Grupo = require('../models/grupo');
 
 
 // ==========================================
 // Obtener las conversaciones del usuario
 // ==========================================
-app.get('/found/:busqueda', (req, res) => {
-  // var found = mongoose.mongo.BSONPure.ObjectID.fromHexString(req.params.busqueda);
-  // Only return one message from each conversation to display as snippet
-  Conversation.find({participants:{$in:[moongose.Type.ObjetId("5aceccaffe043506086de523")]}}) 
-    .exec(function(err, conversations) {
+app.get('/user/:id', (req, res, next) => {
+
+  var busqueda = req.params.id;
+  Conversation.find({participantsId:{ $in: [busqueda] }})
+  .populate('participantsId','nombre img')
+  .exec( (err, conversations, next) => {
       if (err) {
                     return res.status(500).json({
                         ok: false,
@@ -30,14 +29,11 @@ app.get('/found/:busqueda', (req, res) => {
                         errors: err
                     });
                 }
-      if(conversations = []){
-        return res.status(200).json({
-                        ok: false,
-                        mensaje: 'No se ha iniciado ninguna conversacion con ese id',
-                        conversations: conversations,
-                    });
-      }
-
+                // return res.status(200).json({
+                //         ok: true,
+                //         mensaje: 'Prueba',
+                //         conversations: conversations
+                //         });
       // Set up empty array to hold conversations + most recent message
       let fullConversations = [];
       conversations.forEach(function(conversation) {
@@ -46,7 +42,7 @@ app.get('/found/:busqueda', (req, res) => {
           .limit(1)
           .populate({
             path: "author",
-            select: "profile.firstName profile.lastName"
+            select: "nombre img"
           })
           .exec(function(err, message) {
             if (err) {
@@ -57,6 +53,7 @@ app.get('/found/:busqueda', (req, res) => {
                     });
             }
             fullConversations.push(message);
+            fullConversations.private = conversation.private;
             if(fullConversations.length === conversations.length) {
               return res.status(200).json({ conversations: fullConversations });
             }
@@ -107,8 +104,8 @@ app.post('/conversation/:receptor', (req, res, next) => {
                     });
     return next();
   }
-  const conversation = new Conversation({
-    participants: [req.body.user, req.params.receptor]
+  var conversation = new Conversation({
+    participantsId: [req.body.user, req.params.receptor]
   });
 
   conversation.save(function(err, newConversation) {
@@ -126,7 +123,7 @@ app.post('/conversation/:receptor', (req, res, next) => {
       author: req.body.user
     });
 
-    message.save(function(err, newMessage) {
+    message.save(function(err, newMessage) { 
       if (err) {
         return res.status(500).json({
                         ok: false,
