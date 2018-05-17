@@ -96,25 +96,15 @@ io.on('connection', (socket) => {
 
 
     socket.on('leave', function(data) {
-
-        console.log(data.user + 'left the room : ' + data.room);
-
-        socket.broadcast.to(data.room).emit('left room', { user: data.user, message: 'has left this room.' });
-
-        socket.leave(data.room);
+      socket.leave('all');
+      socket.broadcast.to('all').emit('leave all', { user: data.user , leave: true });
     });
 
-    socket.on('inside', function(data) {
-        console.log("Usuario: " + userId + " se conecto a la sala: " + data.conversationId)
+    socket.on('entrar', function(data) {
         socket.join(data.conversationId);
     });
 
     socket.on('message', function(data) {
-        console.log("El usuario: " + userId + " envio a la sala: " + data.sala);
-        console.log("User: " + data.nombre);
-        console.log("Img: " + data.img);
-        console.log("Mensaje: " + data.mensaje);
-        console.log("Hora: " + data.hora);
         io.in(data.sala).emit('new message', { user: data.nombre, img: data.img, mensaje: data.mensaje, hora: data.hora });
         // socket.broadcast.to(data.sala).emit('nuevoMensaje', { user: data.nombre, img: data.img, mensaje: data.mensaje, hora: data.hora });
     })
