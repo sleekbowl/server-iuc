@@ -71,7 +71,7 @@ app.post('/user', (req, res, next) => {
 app.get('/conversation/:conversationId', (req, res, next) => {  
   Message.find({ conversationId: req.params.conversationId })
     .select('createdAt body author')
-    .sort('-createdAt')
+    // .sort('-createdAt')
     .populate({
       path: 'author',
       select: 'nombre img'
@@ -143,11 +143,13 @@ app.post('/conversation/:receptor', (req, res, next) => {
 // ==========================================
 // Enviar un mensaje a una conversacion
 // ==========================================
-app.post('/sendMensaje/:conversationId', (req, res, next) => {  
+app.post('/sendMensaje/', (req, res, next) => {
+  var mensaje = req.body.mensaje;
+  var nombre = req.body.mensaje.nombre;  
   const reply = new Message({
-    conversationId: req.params.conversationId,
-    body: req.body.composedMessage,
-    author: req.user._id
+    conversationId: mensaje.conversationId,
+    body: mensaje.body,
+    author: mensaje.author
   });
 
   reply.save(function(err, sentReply) {
@@ -156,7 +158,7 @@ app.post('/sendMensaje/:conversationId', (req, res, next) => {
       return next(err);
     }
 
-    res.status(200).json({ message: 'Reply successfully sent!' });
+    res.status(200).json({ mensaje: sentReply, nombre:nombre });
     return(next);
   });
 });

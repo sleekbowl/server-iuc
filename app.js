@@ -79,34 +79,50 @@ app.use('/chat', chatRoutes);
 
 app.use('/', appRoutes);
 
-io.on('connection',(socket)=>{
+var userId = "";
+
+io.on('connection', (socket) => {
 
     console.log('Se realizo la coneccion de Sockets exitosamente');
 
 
-    socket.on('join', function(data){
-      //joining
-      socket.join(data.room);
+    socket.on('join', function(data) {
+        //joining
+        socket.join('all');
+        userId = data.user;
 
-      console.log(data.user + 'joined the room : ' + data.room);
-
-      socket.broadcast.to(data.room).emit('new user joined', {user:data.user, message:'has joined this room.'});
+        socket.broadcast.to('all').emit('joined', { user: data.user, leave: false });
     });
 
 
-    socket.on('leave', function(data){
-    
-      console.log(data.user + 'left the room : ' + data.room);
+    socket.on('leave', function(data) {
 
-      socket.broadcast.to(data.room).emit('left room', {user:data.user, message:'has left this room.'});
+        console.log(data.user + 'left the room : ' + data.room);
 
-      socket.leave(data.room);
+        socket.broadcast.to(data.room).emit('left room', { user: data.user, message: 'has left this room.' });
+
+        socket.leave(data.room);
     });
 
-    socket.on('message',function(data){
+    socket.on('inside', function(data) {
+        console.log("Usuario: " + userId + " se conecto a la sala: " + data.conversationId)
+        socket.join(data.conversationId);
+    });
 
-      io.in(data.room).emit('new message', {user:data.user, message:data.message});
+    socket.on('message', function(data) {
+        console.log("El usuario: " + userId + " envio a la sala: " + data.sala);
+        console.log("User: " + data.nombre);
+        console.log("Img: " + data.img);
+        console.log("Mensaje: " + data.mensaje);
+        console.log("Hora: " + data.hora);
+        io.in(data.sala).emit('new message', { user: data.nombre, img: data.img, mensaje: data.mensaje, hora: data.hora });
+        // socket.broadcast.to(data.sala).emit('nuevoMensaje', { user: data.nombre, img: data.img, mensaje: data.mensaje, hora: data.hora });
     })
+
+    socket.on('disconnect', function(data) {
+        socket.broadcast.to('all').emit('left', { user: userId, leave: false });
+        socket.leave('all');
+    });
 });
 
 
