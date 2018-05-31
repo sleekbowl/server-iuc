@@ -354,7 +354,7 @@ function obtenerMenu(ROLE) {
                 titulo: 'Mantenimiento',
                 icono: 'mdi mdi-folder-lock-open',
                 submenu: [
-                    { titulo: 'Calificaciones', url: '/calificaciones' },
+                    { titulo: 'Materia', url: '/materias' },
                     { titulo: 'Grupos', url: '/grupos' },
                     { titulo: 'Carreras', url: '/carreras' },
                     { titulo: 'Matriculas', url: '/matriculas' },

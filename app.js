@@ -38,10 +38,10 @@ var busquedaRoutes = require('./routes/busqueda');
 var uploadRoutes = require('./routes/upload');
 var imagenesRoutes = require('./routes/imagenes');
 var matriculaRoutes = require('./routes/matricula');
-var calfMateriaRoutes = require('./routes/calfMateria');
 var carreraRoutes = require('./routes/carrera');
 var grupoRoutes = require('./routes/grupo');
 var chatRoutes = require('./routes/chat');
+var materiaRoutes = require('./routes/materia')
 
 
 
@@ -70,10 +70,10 @@ app.use('/busqueda', busquedaRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/img', imagenesRoutes);
 app.use('/matricula', matriculaRoutes);
-app.use('/calfMaterias', calfMateriaRoutes);
 app.use('/carrera', carreraRoutes);
 app.use('/grupo', grupoRoutes);
 app.use('/chat', chatRoutes);
+app.use('/materia', materiaRoutes);
 
 
 
